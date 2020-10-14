@@ -1,0 +1,10 @@
+[windows]
+ad1.5sent5.internal
+
+
+[windows:vars]
+ansible_connection=winrm
+ansible_user=Administrator
+ansible_password=xxxxx
+ansible_winrm_server_cert_validation=ignore
+ansible_become=false
