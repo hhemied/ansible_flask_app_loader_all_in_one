@@ -1,0 +1,17 @@
+---
+- name: installing license 
+  hosts: localhost
+  connection: local
+  collections:
+    - awx.awx
+  vars:
+    tower_config_file: "~/tower_cli.cfg"
+  tasks:
+    - name: set license using files
+      tower_license:
+        data: "{{ lookup('file','/home/devops/license.txt') }}"
+        eula_accepted: true
+        tower_host: "{{ tower_hostname }}"
+        tower_username: "{{ tower_admin_username }}"
+        tower_password: "{{ tower_admin_password }}"
+        validate_certs: false

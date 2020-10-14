@@ -1,0 +1,29 @@
+---
+- name: adding users to tower
+  hosts: localhost
+  connection: local
+  vars:
+    tower_config_file: "~/tower_cli.cfg"
+    users:
+      - name: user1
+        email: user1@lab.local
+        password: "redhat"
+        firstname: User1
+      - name: user2
+        email: user2@lab.local
+        password: "redhat"
+        firstname: User2
+
+  tasks:
+    - name: Add tower user
+      tower_user:
+        username: "{{ __user.name }}"
+        password: "{{ __user.password }}"
+        email: "{{ __user.email }}"
+        first_name: "{{ __user.firstname }}"
+        state: present
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: __user
+       
+    

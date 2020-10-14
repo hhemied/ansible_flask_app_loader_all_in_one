@@ -1,0 +1,65 @@
+---
+- name: deploying the usage training lab
+  hosts: localhost
+  connection: local
+  vars:
+    tower_config_file: "~/tower_cli.cfg"
+  collections:
+    - awx.awx
+
+  tasks:
+    - name: Add Tower Project with cache timeout and custom virtualenv
+      tower_project:
+        name: "Multi Tier SCM"
+        description: "Multi Tier App Deployment Project"
+        organization: "Default"
+        scm_update_on_launch: True
+        scm_type: "git"
+        scm_url: "https://github.com/hhemied/ansible_flask_app_loader_all_in_one.git"
+        state: present
+
+    - name: Add tower inventory
+      tower_inventory:
+        name: "Multi Tier Inventory" 
+        description: "Multi Tier Inventory"
+        organization: "Default"
+        state: present
+    
+    - name: Add an inventory source
+      tower_inventory_source:
+        name: "Multi Tier Static"
+        description: Source for project
+        instance_groups: isolated
+        source: scm
+        update_on_launch: true
+        inventory: "Multi Tier Inventory"
+        overwrite: True
+        source_project: "Multi Tier SCM"
+        update_on_launch: True
+        organization: Default
+        source_vars:
+          private: false
+
+    - name: Add Credential Into Tower
+      tower_credential:
+        name: "Multi Tier Private Key" 
+        credential_type: Machine
+        organization: Default
+        inputs:
+          username: ec2-user
+          ssh_key_data: "{{ lookup('env','KEY') }}"
+      run_once: true
+      delegate_to: localhost
+    
+    - name: Create Tower Ping job template
+      tower_job_template:
+        name: "Deploy Multi Tier"
+        job_type: "run"
+        organization: "Default"
+        inventory: "Multi Tier Inventory"
+        project: "Multi Tier SCM"
+        playbook: "site.yml"
+        credentials:
+          - "Multi Tier Private Key"
+        state: "present"
+
